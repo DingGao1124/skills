@@ -1,0 +1,37 @@
+schema_version = 1
+package_name = "agent-skills"
+description = "用于代码仓库重构与应用迁移的可复用 Agent Skills。"
+
+[[skills]]
+name = "refactor-codebase"
+path = "refactor-codebase"
+entrypoint = "refactor-codebase/SKILL.md"
+description = "对代码质量、业务逻辑、系统架构和技术栈迁移四类仓库重构进行分类、规划、执行与复核。"
+purpose = "为宽泛或跨模块的重构请求选择正确工作流，并根据影响层级加强基线验证、兼容、发布和回滚控制。"
+use_when = "需要重构整个仓库、调整业务规则、重划模块边界，或执行语言、框架、平台、运行时与存储迁移时。"
+content_sha256 = "e186561e65477381a8533ad84060c66e4b2b53202560bdf99ab16e0f0eab533c"
+files = [
+  "refactor-codebase/SKILL.md",
+  "refactor-codebase/agents/openai.yaml",
+  "refactor-codebase/references/architecture-refactoring.md",
+  "refactor-codebase/references/business-logic-refactoring.md",
+  "refactor-codebase/references/code-quality-refactoring.md",
+  "refactor-codebase/references/planning-and-governance.md",
+  "refactor-codebase/references/technology-migration.md",
+]
+
+[[skills]]
+name = "migrate-application-to-web"
+path = "migrate-application-to-web"
+entrypoint = "migrate-application-to-web/SKILL.md"
+description = "将桌面端、本地优先、CLI 或其他特权运行时应用逐步迁移到浏览器前端、网络 API 和服务端存储。"
+purpose = "系统处理本地能力后端化、API Contract、数据兼容、纵向业务切片、Provider 替换，以及迁移过程中的切换与回滚。"
+use_when = "需要迁移到 Vite/React 等浏览器平台，且旧系统依赖文件系统、进程、系统凭据、原生事件或嵌入式运行时时。"
+content_sha256 = "428ab9d7a29d2a3dfbb31a15920667280cfe87d817da8f1d0c77f009b946bbe8"
+files = [
+  "migrate-application-to-web/SKILL.md",
+  "migrate-application-to-web/agents/openai.yaml",
+  "migrate-application-to-web/references/boundary-mappings.md",
+  "migrate-application-to-web/references/deliverables.md",
+  "migrate-application-to-web/references/execution-gates.md",
+]

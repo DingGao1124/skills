@@ -1,0 +1,4 @@
+interface:
+  display_name: "Refactor Codebase"
+  short_description: "Route and execute four levels of refactoring"
+  default_prompt: "Use $refactor-codebase to classify this repository change, load only the relevant refactoring workflow, and produce a safe plan before implementation."
