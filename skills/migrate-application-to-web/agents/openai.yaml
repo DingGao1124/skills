@@ -1,4 +1,4 @@
 interface:
   display_name: "Migrate Application to Web"
-  short_description: "Plan and execute native-to-web migrations"
-  default_prompt: "Use $migrate-application-to-web to assess this application and produce a safe, incremental migration plan for a browser frontend and backend APIs."
+  short_description: "Plan safe additive migrations into web products"
+  default_prompt: "Use $migrate-application-to-web to assess this source and target product, define contracts and authority boundaries, then plan safe vertical migration slices."

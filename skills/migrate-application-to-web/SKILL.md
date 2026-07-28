@@ -1,236 +1,204 @@
 ---
 name: migrate-application-to-web
-description: Analyze, plan, and incrementally migrate desktop, native, CLI, local-first, or other privileged-runtime applications to a browser frontend—especially Vite/React—backed by network APIs and server-side storage. Use when moving filesystem, process, OS, credential, event, or embedded-runtime capabilities behind backend services; changing source languages or backend stacks; replacing local or AI-provider integrations; creating migration matrices and API contracts; preserving selected behavior while redesigning platform-dependent features; or executing approved vertical migration slices. Do not use for ordinary behavior-preserving code cleanup.
+description: Analyze, design, and incrementally migrate desktop, native, CLI, local-first, or privileged-runtime applications into a browser frontend and API-backed server, including integration into an existing frontend/backend product. Use for cross-framework or cross-language migrations; additive routes and modules that must preserve existing behavior; moving filesystem, process, credential, model, asset, job, or event capabilities behind services; defining API/data contracts and migration counts; preparing one side while the other is unavailable; or executing reviewed vertical slices. Do not use for ordinary behavior-preserving cleanup.
 ---
 
 # Migrate Application to Web
 
-Treat this work as a platform migration and architecture redesign, not a mechanical language conversion. Preserve business semantics deliberately while replacing runtime assumptions that cannot exist in a browser.
+Treat the task as a change of runtime, authority, and product integration—not source-language translation. Preserve selected user outcomes while replacing assumptions that are unsafe or unavailable in browsers.
 
-## Load the relevant references
+## Load references only when needed
 
-- Read [boundary-mappings.md](references/boundary-mappings.md) when inventorying local or privileged capabilities and selecting web replacements.
-- Read [deliverables.md](references/deliverables.md) when producing the capability inventory, boundary ledger, migration matrix, architecture decision, or API contract.
-- Read [execution-gates.md](references/execution-gates.md) before implementing a slice, migrating data, running parallel systems, cutting over, or deleting legacy code.
+- Read [boundary-mappings.md](references/boundary-mappings.md) to map local/privileged capabilities to web-safe ownership.
+- Read [deliverables.md](references/deliverables.md) to create inventories, contracts, matrices, repository maps, or progress records.
+- Read [execution-gates.md](references/execution-gates.md) before implementation, data migration, cutover, or legacy removal.
 
-## Choose the operating mode
+## Select the operating mode
 
-Infer the narrowest mode supported by the request:
+Use the narrowest mode authorized by the request:
 
-1. **Assess**: inspect the source system and report its behavior, dependencies, boundaries, risks, and unknowns. Do not edit code.
-2. **Design**: produce the migration matrix, target architecture, contracts, sequence, and verification plan. Do not edit product code.
-3. **Execute one slice**: implement one approved end-to-end capability and update its migration artifacts.
-4. **Review or cut over**: verify parity, operational readiness, data migration, and removal criteria.
+1. **Assess**: inspect and report; do not edit.
+2. **Design**: define scope, target architecture, contracts, counts, phases, and verification; do not edit product code.
+3. **Execute**: implement approved vertical slices and update migration records.
+4. **Review/cut over**: verify readiness, data migration, operations, rollback, and removal gates.
 
-For a whole-application request, default to Assess and Design. Stop after presenting the plan unless the user explicitly authorizes implementation without a review checkpoint. Never interpret “migrate the whole project” as permission for a big-bang rewrite.
+For an ambiguous whole-project request, assess and design before implementing. Once the user approves a concrete implementation plan, execute it without repeatedly reopening settled choices.
+
+## Establish repository and authority boundaries first
+
+Before writing code:
+
+- locate every source, target frontend, target backend, shared package, and specification directory;
+- read repository instructions and build/test commands;
+- record which repositories are read-only and which may be changed;
+- inspect branches, configured Git identity, dirty files, and untracked user artifacts;
+- identify protected routes, components, APIs, tables, queues, and behaviors;
+- confirm whether integration is additive, replacing, or temporarily coexisting;
+- capture runtime versions and package-manager/toolchain requirements.
+
+Keep migration artifacts in a dedicated target-side directory such as `specs/<migration-name>/`; do not mix them into unrelated specifications. Never “clean up” an existing dirty worktree or include unrelated files in a commit.
 
 ## Establish the migration contract
 
-Before designing code, classify every requirement:
+Classify each user capability:
 
-- **Preserve**: externally observable behavior that must remain equivalent.
-- **Change**: behavior intentionally redesigned for the target platform.
-- **Retire**: capability that must not be migrated.
-- **Unknown**: behavior requiring evidence or a product decision.
+- **Preserve**: observable behavior must remain equivalent.
+- **Change**: redesign is intentional and documented.
+- **Retire**: explicitly out of scope.
+- **Unknown**: requires evidence or a product decision.
 
-Record target constraints such as browser support, deployment model, tenancy, authentication, offline expectations, data residency, performance, scale, compliance, and whether the backend stack is fixed.
+Also record target constraints: frontend and backend stacks, authentication, database/object storage/queue choices, tenancy, browser support, offline behavior, deployment, performance, compliance, and compatibility.
 
-Do not silently choose a backend language or storage system. Prefer reuse only when it reduces migration risk without preserving unsuitable desktop assumptions.
+Do not silently replace a fixed stack or reinterpret an additive integration as permission to overwrite existing routes and features.
 
-## Follow the migration workflow
+## Follow the workflow
 
-### Phase 1: Establish a behavioral baseline
+### 1. Evidence the source behavior
 
-Inspect source, tests, configuration, fixtures, data files, schemas, build scripts, and operational documentation.
+Inspect entry points, UI flows, modules, tests, fixtures, schemas, configuration, build scripts, and operational docs. Produce a capability inventory grouped by user workflow, including:
 
-Produce:
-
-- user-visible capability inventory;
-- entry points and module ownership;
 - domain entities and invariants;
-- persistence formats and compatibility requirements;
-- background jobs, event flows, failure behavior, and recovery behavior;
-- existing automated and manual verification;
-- uncertain behavior that needs characterization tests or product input.
+- persistence and asset formats;
+- long-running work, events, failure, retry, and recovery;
+- source runtime dependencies;
+- evidence and unresolved behavior.
 
-Do not equate current implementation details with required behavior.
+Implementation details are evidence, not automatically requirements.
 
-### Phase 2: Inventory runtime boundaries
+### 2. Inventory runtime boundaries and state ownership
 
-Find every capability that depends on the source runtime:
+Find filesystem access, local databases, shell/process calls, native APIs, credentials, embedded runtimes, provider SDKs, background tasks, custom protocols, and event emitters.
 
-- filesystem paths, dialogs, watches, imports, exports, and atomic writes;
-- local databases, caches, and application directories;
-- child processes, shell commands, native libraries, devices, and clipboard;
-- credentials, environment variables, machine identity, and OS permissions;
-- custom URI schemes, local media serving, streaming events, and background tasks;
-- direct model/provider SDK calls, local agents, and provider-specific payloads.
+For each boundary, assign:
 
-For each boundary, record the business purpose, caller, input/output, authority, failure modes, security assumptions, and proposed target owner. Use the boundary ledger in [deliverables.md](references/deliverables.md).
+- current and target authority;
+- caller, input/output, security assumptions, and failure modes;
+- synchronous, async, streaming, or resumable behavior;
+- target API, database, object storage, queue, browser API, or redesign.
 
-### Phase 3: Separate domain behavior from platform adapters
+Separate server-authoritative business state, binary assets, browser cache, recoverable drafts, and ephemeral interaction state. Do not use a client store or local storage as accidental business persistence.
 
-Extract the conceptual layers before deciding file structure:
+### 3. Design contracts before implementation
 
-- **Domain**: business rules, invariants, state transitions, and value objects.
-- **Application**: use cases, orchestration, authorization intent, and transaction boundaries.
-- **Ports/contracts**: persistence, files, jobs, model inference, events, clocks, and identifiers.
-- **Adapters**: source runtime, HTTP handlers, databases, object storage, queues, and external providers.
-- **Presentation**: browser UI, server state access, and ephemeral interaction state.
+Design APIs around resources and user outcomes, not one endpoint per legacy function. Specify:
 
-Reuse pure logic where practical. Reimplement platform adapters. Rewrite coupled logic only after characterizing the behavior that must survive.
+- authorization and tenant/account scope;
+- exact request, response, error, and event schemas;
+- stable IDs, pagination, and filtering;
+- version tokens and real conflict behavior;
+- upload types, size limits, checksums, lineage, and URL lifetime;
+- idempotency, retries, cancellation, timeouts, and restart recovery;
+- SSE/WebSocket/polling cursor and replay semantics;
+- which side mutates authoritative data.
 
-### Phase 4: Define data ownership
+Return true transport status where clients depend on it; for example, optimistic-lock conflicts must not be hidden inside an HTTP 200 envelope.
 
-Assign one authority for every state category:
+Count APIs, tables, queues, and new routes only after the contract is explicit. Treat counts as planning outputs, not architecture targets.
 
-- server-authoritative business data;
-- object/blob storage for binary assets;
-- browser cache of server state;
-- recoverable local drafts or offline queue;
-- ephemeral UI state;
-- export files produced on demand.
+### 4. Design the target around ownership
 
-Do not expose server filesystem paths to the browser. Exchange resource IDs, version tokens, signed or authorized URLs, and business metadata.
+Keep conceptual boundaries clear:
 
-Use browser downloads for export, upload protocols for imports, and IndexedDB only for drafts, caches, or offline recovery unless the requirements explicitly make the browser the durable authority.
+- domain rules and state transitions;
+- application orchestration and transaction boundaries;
+- ports for storage, assets, jobs, providers, events, clocks, and IDs;
+- adapters for HTTP, database, object storage, queues, and external services;
+- presentation and ephemeral editor state.
 
-### Phase 5: Design the target architecture
+For rich editors or canvases, keep the rendering/geometry scene pure: pass data and callbacks; do not let it import networking, server-state caches, routers, or global business state.
 
-Choose components from requirements rather than habit:
+Use stable object names or resource IDs as durable asset identity. Generate current authorized/signed URLs when reading. Validate actual content type, dimensions, size, hash, and ownership/lineage server-side.
 
-- Vite/React application organized by product capability;
-- typed API client and runtime validation at trust boundaries;
-- backend application services and domain modules;
-- repositories for database or file/object storage;
-- job execution for long-running work;
-- SSE, WebSocket, or polling for progress;
-- shared or generated API types;
-- authentication, authorization, observability, and deployment boundaries.
+### 5. Build a phased vertical-slice plan
 
-Separate server state from client interaction state. Use a server-state library when its caching and invalidation model helps; reserve a client store for editor state, selections, drafts, and transient UI.
+Create one migration-matrix row per user capability:
 
-Document consequential choices as architecture decisions with alternatives and tradeoffs.
+`source outcome → target route/UI → API/use case → authority → compatibility → verification → status`
 
-### Phase 6: Design contracts before implementations
+Order slices by dependencies and product value. For integration into an existing product:
 
-Design APIs around resources and use cases, not one endpoint per legacy function.
+- add new routes/navigation instead of changing protected flows;
+- prefer feature-local copies or adapters when shared refactors risk regression;
+- keep the application runnable after each slice;
+- use feature flags, compatibility adapters, or strangler routing where useful.
 
-Specify:
+Define a commit sequence before implementation when the work spans multiple core capabilities.
 
-- endpoint or RPC operation and authorization;
-- request, response, and error schemas;
-- resource identifiers and versioning;
-- upload/download behavior and size limits;
-- idempotency and retry semantics;
-- optimistic concurrency or conflict behavior;
-- pagination and filtering where relevant;
-- cancellation, timeout, and progress semantics for long-running work;
-- compatibility and deprecation policy.
+### 6. Prepare one side without faking the other
 
-Create or update OpenAPI, JSON Schema, protobuf, or an equivalent machine-checkable contract. Generate types where feasible; otherwise verify frontend and backend schemas against the same contract.
+When the backend is unavailable, the frontend can still be integration-ready if it has:
 
-### Phase 7: Build the migration matrix
+- exact domain/API types and runtime response validation;
+- a service boundary and server-state query layer;
+- explicit query keys, invalidation, loading, error, conflict, and reconnect behavior;
+- formal API calls rather than development-only fake persistence;
+- component and contract tests at critical boundaries.
 
-Create one row per user capability, not per source function. Map:
+Document that browser calls will fail until the real service exists. Do not claim end-to-end readiness or invent a mock server unless requested.
 
-`source behavior → target UI → API/use case → data owner → compatibility rule → tests → status`
+When starting the backend from a prepared frontend contract, first reconcile both documents and isolate changes in the target backend’s migration-spec directory.
 
-Include explicit dependencies, risks, decisions, and rollback. Rank slices by architectural learning, user value, and dependency order. Prefer a small slice that crosses all new boundaries over a broad horizontal layer.
+### 7. Implement durable backend boundaries
 
-### Phase 8: Establish the target foundation
+For long-running work:
 
-Build only what the first slice needs:
+- persist Job, Step, and ordered Event state in the database as the truth source;
+- use a queue for delivery, not as the only record of truth;
+- define claim, lease renewal, ACK, visibility recovery, and poison-message handling;
+- commit status transitions and their events atomically;
+- make create operations idempotent with a client request ID;
+- ignore or quarantine late results after cancellation;
+- retry failed work without repeating successful steps.
 
-- application shells and local development workflow;
-- API error envelope and request correlation;
-- authentication skeleton if required;
-- first storage repository and migration mechanism;
-- typed client and contract verification;
-- observability needed to diagnose the first slice;
-- CI checks for both sides.
+For optimistic documents, use compare-and-swap revisions. Preserve generated artifacts when finalization conflicts; where safe, retry only finalization rather than repeating expensive generation.
 
-Avoid building every repository, route, component, and abstraction upfront.
+For streaming, persist before emitting. Support replay after a sequence/cursor, deduplicate client-side, authorize before opening the stream, and send heartbeats.
 
-### Phase 9: Migrate vertical slices
+### 8. Execute each approved slice
 
-For each approved slice:
+For each slice:
 
-1. Define observable acceptance criteria.
-2. Add characterization tests around behavior to preserve.
-3. Finalize the slice contract.
-4. Implement backend domain/application behavior.
-5. Implement persistence and external adapters.
-6. Implement the typed frontend client.
-7. Implement the React flow and state handling.
-8. Cover loading, failure, retry, cancellation, and conflict states.
-9. Run contract, integration, end-to-end, and parity checks.
-10. Update the migration matrix and decision log.
+1. Reconfirm protected behavior and acceptance criteria.
+2. Finalize its API/event/data contract.
+3. Implement the smallest complete backend and frontend path.
+4. Cover loading, empty, error, retry, cancellation, conflict, refresh, and reconnect states that apply.
+5. Add tests only at consequential boundaries; do not create one test file per implementation file.
+6. Run focused checks, then the repository’s required full checks at phase boundaries.
+7. Review the diff against repository and authority boundaries.
+8. Update progress, verification evidence, external blockers, and next step.
+9. When commits are authorized or expected by the repository workflow, commit the core capability with the configured identity.
 
-Keep the system runnable after every slice. Use a strangler path, feature flag, compatibility adapter, or dual-run comparison when replacement risk is material.
+Do not push, open a merge request, deploy, migrate live data, or enable a production feature without authorization.
 
-### Phase 10: Migrate data and cut over
+### 9. Integrate and cut over honestly
 
-Define:
+Verify frontend/backend schema agreement, authentication, ownership isolation, conflict transport, upload limits, event replay, cancellation, refresh recovery, and representative user workflows.
 
-- import and transformation rules;
-- stable identity mapping;
-- binary asset transfer;
-- schema version handling;
-- resumability and idempotency;
-- validation totals and reconciliation;
-- rollback and backup;
-- coexistence duration and final ownership.
+If MySQL, Redis, object storage, provider credentials, or production-like services are unavailable, complete safe code/test/build work and record the real integration blocker. Never report a mocked or unexecuted external dependency as successful.
 
-Delete legacy code only after its matrix rows meet the removal gates in [execution-gates.md](references/execution-gates.md).
+Apply schema/configuration before enabling a feature flag. Rehearse data migration, reconciliation, backup, rollback, and coexistence before cutover. Remove legacy code only after its traffic and authority reach zero.
 
-## Isolate model and provider migration
+## Treat model/provider migration as an adapter
 
-Treat model access as a port, not a UI or domain concern. Define a provider-neutral contract for:
+Keep provider credentials, SDK types, raw events, model names, and transport recovery behind a provider-neutral port. Normalize messages, assets, structured output, usage, errors, cancellation, retries, and request/job/result correlation.
 
-- normalized messages and structured inputs;
-- asset uploads and references;
-- streaming text, progress, tool, and result events;
-- structured outputs and validation;
-- cancellation, retry, timeout, and idempotency;
-- safety, quota, authentication, and error categories;
-- correlation between a request, background job, and persisted result.
+Validate structured output before applying it to authoritative state. Scope partial edits to the requested resource or subresource so a model result cannot cross project, document, or component boundaries.
 
-Keep provider model names, SDK objects, event names, credentials, and transport recovery inside adapters. Preserve product-visible behavior, not the previous provider protocol. Use recorded fixtures or contract tests to compare old and new adapters when possible.
+## Review checklist
 
-## Enforce implementation discipline
+Before declaring a phase complete, confirm:
 
-- Change one business slice at a time.
-- Keep public contracts explicit and versioned.
-- Avoid speculative frameworks and abstractions.
-- Do not mix unrelated cleanup with migration work.
-- Preserve source code until replacement behavior and data recovery are verified.
-- Surface assumptions and blockers instead of inventing product policy.
-- Re-run the relevant baseline after every slice.
-- Record deliberate behavior changes so parity failures are not hidden as “platform differences.”
+- only authorized repositories and files changed;
+- protected routes, APIs, tables, queues, and user behaviors remain unchanged;
+- contracts and runtime parsers agree;
+- server state is not duplicated into client interaction state;
+- authoritative queries include account/tenant ownership;
+- signed URLs and secrets are not durable identifiers;
+- conflict, idempotency, cancellation, replay, and restart recovery are explicit;
+- tests are proportional and verification commands passed in the required runtime;
+- progress docs and known external blockers are current;
+- unrelated dirty/untracked files are preserved.
 
-## Reject common failure modes
+## Completion
 
-Do not:
-
-- translate each source function into an endpoint;
-- send absolute server paths to the browser;
-- copy server data into a client store without an ownership/invalidation model;
-- use local browser storage as accidental durable business storage;
-- rewrite the frontend and backend horizontally before completing one usable flow;
-- couple domain code to HTTP, database, browser, or provider SDK types;
-- claim parity from successful compilation alone;
-- delete legacy code before cutover, reconciliation, and rollback are proven.
-
-## Define completion
-
-Consider the migration complete only when:
-
-- every in-scope capability has an accepted matrix disposition;
-- preserved behaviors have evidence, and changed behaviors are documented;
-- API and event contracts are versioned and verified;
-- authoritative data ownership is unambiguous;
-- imports, exports, background work, failures, and recovery are tested;
-- migration and rollback are rehearsed on representative data;
-- observability and support procedures exist;
-- legacy dependencies and code are removed only after their traffic and data ownership reach zero.
+The migration is complete only when every in-scope matrix row has accepted evidence; authority is unambiguous; contracts, assets, background work, failures, and recovery are verified; data migration and rollback are rehearsed; operational ownership exists; and legacy paths are removed only after cutover criteria are met.

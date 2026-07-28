@@ -4,14 +4,24 @@ Use these compact templates. Keep evidence linked to code, tests, schemas, or ob
 
 ## Contents
 
+- Repository authority map
 - Capability inventory
 - Runtime boundary ledger
 - Behavior contract
 - Migration matrix
 - Architecture decision
 - API/use-case contract
-- Target architecture summary
+- Integration-readiness record
+- Migration progress record
 - Slice acceptance packet
+
+## Repository authority map
+
+| Repository/path | Role | Writable? | Baseline/branch | Protected surfaces | Dirty/untracked state | Toolchain and verification |
+|---|---|---|---|---|---|---|
+| Path | Source/target frontend/target backend/specs | yes/no | Commit or branch | Routes/APIs/tables/files | Preserve exactly | Runtime and commands |
+
+Create this before implementation. Keep source and target specifications in their intended repositories; do not assume the current working directory is the write target.
 
 ## Capability inventory
 
@@ -93,6 +103,7 @@ Request schema:
 Response schema:
 Error schema and status mapping:
 Resource identity/version:
+Authoritative mutation owner:
 Idempotency/retry:
 Concurrency/conflicts:
 Upload/download limits:
@@ -115,19 +126,28 @@ For errors, prefer a stable product envelope:
 
 Do not leak stack traces, provider payloads, or server paths.
 
-## Target architecture summary
+## Integration-readiness record
 
-Document:
+When one side is not runnable, record what is and is not ready:
 
-1. context diagram and trust boundaries;
-2. frontend feature boundaries and state ownership;
-3. backend application/domain/repository boundaries;
-4. API, event, and binary transport contracts;
-5. database/object storage ownership;
-6. authentication and tenant isolation;
-7. background jobs and provider adapters;
-8. observability and operations;
-9. compatibility, migration, rollback, and deletion strategy.
+- contract/types/runtime parsers complete;
+- formal service/query boundary complete;
+- conflict, replay, cancellation, and refresh behavior covered;
+- focused tests and build evidence;
+- real external dependencies still unavailable;
+- exact live-integration steps and acceptance checks.
+
+Do not label this end-to-end verified.
+
+## Migration progress record
+
+Maintain one target-side document:
+
+| Phase | Core outcome | Status | Verification | Review | Commit | Blocker/next step |
+|---|---|---|---|---|---|---|
+| Phase | Capability, not file list | planned/in progress/complete | Commands and results | Protected surfaces checked | Subject/hash | External dependency or next slice |
+
+Update it before each core commit. Record failed checks and their resolution when they reveal a reusable environment or contract constraint.
 
 ## Slice acceptance packet
 

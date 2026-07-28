@@ -12,6 +12,9 @@ Use these gates to keep a migration incremental and reversible.
 
 Require:
 
+- repository authority map, writable targets, and protected surfaces;
+- clean or explicitly preserved target baseline, including dirty/untracked user files;
+- required runtime/toolchain versions and baseline verification commands;
 - target users and deployment model;
 - in-scope and retired capabilities;
 - preserve/change/retire/unknown classification;
@@ -39,7 +42,9 @@ Require:
 - architecture decision for major boundaries;
 - authoritative owner for each data category;
 - API and event schemas;
+- authoritative mutation owner for each workflow;
 - identity, versioning, idempotency, and conflict rules;
+- transport status behavior where clients depend on HTTP semantics;
 - import/export and binary transport rules;
 - provider-neutral contracts for external model/runtime integrations.
 
@@ -70,6 +75,8 @@ Run the applicable layers:
 8. parity or explicitly accepted-difference checks.
 
 Update the migration matrix to `verified` only with evidence.
+If an external dependency is unavailable, mark the slice integration-ready rather than verified and record the blocker.
+Run verification with the repository’s required toolchain version; results from an incompatible runtime are not valid evidence.
 
 ## Gate 5: Data migration rehearsed
 
@@ -116,18 +123,15 @@ Delete in a separate change from the initial cutover when practical.
 
 Prefer small working checkpoints:
 
-1. characterization and fixtures;
+1. baseline and isolated migration records;
 2. contract/schema;
-3. backend domain/application behavior;
-4. persistence or provider adapter;
-5. typed client;
-6. frontend flow;
-7. integration/E2E and failure handling;
-8. migration-matrix evidence;
-9. legacy routing switch;
-10. later cleanup/removal.
+3. target shell or typed client;
+4. backend domain, persistence, and adapters;
+5. one vertical user flow;
+6. integration and failure recovery;
+7. migration evidence and later cutover/removal.
 
-Each checkpoint must leave the branch buildable and make its verification command explicit.
+Each core checkpoint must leave the branch buildable, update progress evidence, and use the repository-configured Git identity. Do not include unrelated dirty files. Pushing, deployment, live migration, and feature enablement remain separate authorizations.
 
 ## Stop conditions
 

@@ -21,6 +21,7 @@ Use this reference to translate privileged-runtime capabilities into web archite
 | OS user/machine identity | Application account, organization, tenant, device registration | Authentication, authorization, privacy |
 | Custom URI/deep link | HTTPS route, registered web link, application callback | Authentication state, validation, browser routing |
 | Direct provider/model SDK | Backend provider adapter behind a product-owned inference contract | Streaming schema, files, model selection, errors, cost |
+| Embedded canvas/editor engine | Pure renderer/geometry module plus browser interaction state and server-owned document API | Save authority, revision conflicts, large assets, export owner |
 
 ## Classify each boundary
 
@@ -57,6 +58,10 @@ GET /jobs/{id}/events or SSE/WebSocket stream
 ```
 
 Define terminal states, retry ownership, idempotency keys, cancellation guarantees, event ordering, reconnection, and what survives a server restart. Persist the result before announcing completion.
+
+Use the durable database as the Job/Step/Event truth source. Treat Redis or another broker as delivery infrastructure: define claim, lease renewal, ACK, visibility recovery, and invalid-message isolation. When a costly generation succeeds but document finalization conflicts, preserve the artifact and retry only the safe finalization step.
+
+For event streams, authorize before opening, persist events before emitting, assign monotonic sequence numbers, accept a replay cursor, send heartbeats, and make client invalidation idempotent.
 
 ## Model-provider adapter rules
 
