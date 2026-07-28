@@ -1,4 +1,4 @@
 interface:
   display_name: "Migrate Application to Web"
-  short_description: "Plan safe additive migrations into web products"
-  default_prompt: "Use $migrate-application-to-web to assess this source and target product, define contracts and authority boundaries, then plan safe vertical migration slices."
+  short_description: "Inventory, track, and close web migrations"
+  default_prompt: "Use $migrate-application-to-web to map source capabilities and logic chains, execute tracked vertical slices, and produce an evidence-backed final migration summary."

@@ -6,6 +6,7 @@ Use these compact templates. Keep evidence linked to code, tests, schemas, or ob
 
 - Repository authority map
 - Capability inventory
+- Logic-chain map
 - Runtime boundary ledger
 - Behavior contract
 - Migration matrix
@@ -13,7 +14,20 @@ Use these compact templates. Keep evidence linked to code, tests, schemas, or ob
 - API/use-case contract
 - Integration-readiness record
 - Migration progress record
+- Final migration summary
 - Slice acceptance packet
+
+## Required record lifecycle
+
+Keep one isolated migration directory. Adapt filenames to repository conventions, but preserve these three records:
+
+| Timing | Record | Required content |
+|---|---|---|
+| Before implementation | Baseline/design package | Repository authority, capability inventory, source/target logic chains, contracts, decisions, counts, phases, risks, acceptance |
+| During implementation | Progress ledger | Current slice, status, actual outcome, verification, review, commit, blocker, next step |
+| After implementation | Final migration summary | Implemented frontend/backend functions, final chains, exact counts, invariants, verification, deployment operations, unverified boundaries |
+
+Update records in place. Do not create disconnected status files for each commit or infer final behavior from an obsolete plan.
 
 ## Repository authority map
 
@@ -30,6 +44,28 @@ Create this before implementation. Keep source and target specifications in thei
 | Name | Why it exists | UI/command/module | Invariants | FS/process/SDK/etc. | Entities/assets | Observable behavior | Preserve/change/retire/unknown |
 
 Group by user workflow. Do not create one row per function.
+
+## Logic-chain map
+
+Record one source and target chain for each user workflow:
+
+| Stage | Source implementation | Target implementation | Authority | Input/output | Failure/recovery | Evidence |
+|---|---|---|---|---|---|---|
+| Trigger/UI/orchestration/persistence/provider/event/reconciliation | Module or runtime | Route/component/API/worker | Client/DB/blob/provider | Stable contract | Retry/cancel/conflict/replay | Code/test/schema |
+
+Show ordering when it matters:
+
+```text
+user trigger
+  → UI and local interaction state
+  → API/use case
+  → database/object storage/queue/provider
+  → durable event or result
+  → stream/replay/query invalidation
+  → UI reconciliation
+```
+
+Include failure, retry, cancellation, conflict, refresh, reconnect, and process-restart paths where applicable. A module dependency list is not a logic-chain map.
 
 ## Runtime boundary ledger
 
@@ -141,13 +177,31 @@ Do not label this end-to-end verified.
 
 ## Migration progress record
 
-Maintain one target-side document:
+Maintain one target-side document from the first implementation slice through final review:
 
-| Phase | Core outcome | Status | Verification | Review | Commit | Blocker/next step |
-|---|---|---|---|---|---|---|
-| Phase | Capability, not file list | planned/in progress/complete | Commands and results | Protected surfaces checked | Subject/hash | External dependency or next slice |
+| Phase/slice | Core outcome | Status | Contract/authority change | Verification | Review | Commit | Blocker/next step |
+|---|---|---|---|---|---|---|---|
+| Capability, not file list | Actual user outcome | planned/in progress/integration-ready/verified/blocked/cut-over | None or exact delta | Commands and results | Protected surfaces checked | Subject/hash | External dependency or next slice |
 
-Update it before each core commit. Record failed checks and their resolution when they reveal a reusable environment or contract constraint.
+Set `in progress` before implementation. Update actual outcome, evidence, review, and blockers before each core commit. Record failed checks and resolutions when they reveal a reusable environment or contract constraint. Never use `verified` when only mocks or build checks ran.
+
+## Final migration summary
+
+Generate this after implementation by re-reading code, schema, configuration, and tests. Include:
+
+| Section | Required content |
+|---|---|
+| Scope and status | Preserved, changed, retired, excluded; code-complete versus verified/cut-over |
+| Architecture | Source-to-target runtime and authority mapping |
+| Frontend | Routes, modules, state ownership, core user functions, protected existing behavior |
+| Backend | APIs, tables, assets, jobs, queues, events, external-service reuse |
+| End-to-end flows | Success plus failure/retry/cancel/conflict/replay/recovery |
+| Delivery scale | Evidence-backed counts for routes, APIs, tables, queues, modes, migrations |
+| Verification | Commands, test/build/E2E results, environment used |
+| Operations | Schema/config/feature flag/gateway/credentials/deployment/rollback ownership |
+| Remaining boundaries | Unexecuted infrastructure integration, E2E, data migration, or cutover |
+
+Prefer declarative statements, compact matrices, and flow/sequence diagrams. Do not use commit history as a substitute for functional content. Reconcile outdated planning and progress statements before publishing.
 
 ## Slice acceptance packet
 
